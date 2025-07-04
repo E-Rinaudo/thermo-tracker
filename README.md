@@ -90,11 +90,11 @@ Main Excel file where data is stored, follows this format:
 
 ```bash
 # Clone the repository
-git clone https://github.com/E-Rinaudo/thermo_tracker.git # Using Git
-gh repo clone E-Rinaudo/thermo_tracker # Using GitHub CLI
+git clone https://github.com/E-Rinaudo/thermo-tracker.git # Using Git
+gh repo clone E-Rinaudo/thermo-tracker # Using GitHub CLI
 
 # Create a virtual environment
-cd thermo_tracker
+cd thermo-tracker
 python -m venv venv
 
 # Activate the virtual environment (all platforms)
@@ -194,7 +194,7 @@ class ThermoTracker:
 
 ## License
 
-Distributed under the MIT License. See [`LICENSE.txt`](LICENSE.txt) for details.
+Distributed under the MIT License. See [`LICENSE.txt`][license-url] for details.
 
 [back to top](#thermo-tracker)
 
@@ -215,9 +215,9 @@ You can also explore my GitHub profile.
 **Happy coding!**
 
 <!-- SHIELDS -->
-[stars-shield]: https://img.shields.io/github/stars/E-Rinaudo/thermo_tracker.svg?style=flat
+[stars-shield]: https://img.shields.io/github/stars/E-Rinaudo/thermo-tracker.svg?style=flat
 [stars-url]: https://github.com/E-Rinaudo/thermo-tracker/stargazers
-[license-shield]: https://img.shields.io/github/license/E-Rinaudo/thermo_tracker.svg?style=flat
+[license-shield]: https://img.shields.io/github/license/E-Rinaudo/thermo-tracker.svg?style=flat
 [license-url]: https://github.com/E-Rinaudo/thermo-tracker/blob/main/LICENSE.txt
 [Gmail-shield]: https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white
 [Gmail-url]: mailto:enricorinaudo91@gmail.com
