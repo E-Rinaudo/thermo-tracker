@@ -216,9 +216,9 @@ You can also explore my GitHub profile.
 
 <!-- SHIELDS -->
 [stars-shield]: https://img.shields.io/github/stars/E-Rinaudo/thermo_tracker.svg?style=flat
-[stars-url]: https://github.com/E-Rinaudo/thermo_tracker/stargazers
+[stars-url]: https://github.com/E-Rinaudo/thermo-tracker/stargazers
 [license-shield]: https://img.shields.io/github/license/E-Rinaudo/thermo_tracker.svg?style=flat
-[license-url]: https://github.com/E-Rinaudo/thermo_tracker/blob/main/LICENSE.txt
+[license-url]: https://github.com/E-Rinaudo/thermo-tracker/blob/main/LICENSE.txt
 [Gmail-shield]: https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white
 [Gmail-url]: mailto:enricorinaudo91@gmail.com
 
