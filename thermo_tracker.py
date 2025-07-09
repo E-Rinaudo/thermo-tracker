@@ -43,9 +43,9 @@ from registry_manager import RegistryManager
 from usage_manager import UsageManager
 
 # Aliases for all the Enums of constants.py.
+SCons = cons.SharedConstants
 TInst = cons.ThermoInstances
 UserMsgs = cons.UserMessages
-SCons = cons.SharedConstants
 
 # List of manager classes used to initialize instances in ThermoTracker.
 _MANAGERS = (ConfigManager, ExcelFolderManager, RegistryManager, UsageManager)
@@ -78,7 +78,7 @@ class ThermoTracker:
     def __init__(self) -> None:
         """Initializes attributes and manager modules instances."""
         self.config_data = {}
-        self.config_update = {SCons.UPDATE.value: False}
+        self.config_update = {SCons.UPDATE: False}
         self.instances = {
             t_inst_key: manager(self.config_data, self.config_update)
             for t_inst_key, manager in zip(TInst, _MANAGERS)
@@ -87,7 +87,7 @@ class ThermoTracker:
     def run_app(self) -> None:
         """Runs the main process to configure and generate required files."""
         logging.debug("Starting the program.")
-        utils.display_user_info(UserMsgs.INTRO.value)
+        utils.display_user_info(UserMsgs.INTRO)
 
         self._get_config_manager().open_config()
 

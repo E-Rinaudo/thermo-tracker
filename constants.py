@@ -9,7 +9,7 @@ the project.
 """
 
 import os
-from enum import Enum
+from enum import Enum, StrEnum, IntEnum
 from textwrap import dedent
 
 # endregion.
@@ -18,8 +18,8 @@ from textwrap import dedent
 # region Constants.
 
 
-class Folders(Enum):
-    """Enum class storing folder paths used by Thermo Tracker.
+class Folders(StrEnum):
+    """Enum storing folder paths.
 
     Attributes:
         DEFAULT_EXCEL_FOLDER (str): Default path for saving Excel files.
@@ -36,8 +36,8 @@ class Folders(Enum):
     FOLDER_NAME_SUFFIX = "_new"
 
 
-class Files(Enum):
-    """Enum class defining labels for files in Thermo Tracker.
+class Files(StrEnum):
+    """Enum defining labels for files in Thermo Tracker.
 
     Attributes:
         LOG_FILE (str): Path to the logging file.
@@ -52,15 +52,15 @@ class Files(Enum):
     """
 
     LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "log_file.txt")
-    CONFIG_FILE = os.path.join(Folders.CONFIG_FOLDER.value, "thermo_tracker_config.json")
+    CONFIG_FILE = os.path.join(Folders.CONFIG_FOLDER, "thermo_tracker_config.json")
     RADIATORS_REGISTRY = "radiators_registry.xlsx"
     DEFAULT_USAGE_NAME = "radiators_usage_[Years].xlsx"
     YEARS_PLACEHOLDER = "[Years]"
     XLSX = "*.xlsx"
 
 
-class ConfigKeys(Enum):
-    """Enum class for keys used to retrieve values from the config file.
+class ConfigKeys(StrEnum):
+    """Enum for keys used to retrieve values from the config file.
 
     Attributes:
         EXCEL_FOLDER (str): To retrieve the Excel folder path.
@@ -87,8 +87,8 @@ class ConfigKeys(Enum):
     START_ROW = "start_row"
 
 
-class DateFormats(Enum):
-    """Enum class defining supported date formats for the usage file.
+class DateFormats(StrEnum):
+    """Enum defining supported date formats for the usage file.
 
     Attributes:
         EU_FORMAT (str): European format string (DD/MM/YYYY).
@@ -103,8 +103,24 @@ class DateFormats(Enum):
     US_LABEL = "MM/DD/YYYY"
 
 
-class SharedConstants(Enum):
-    """Enum class for shared constants used across the application.
+class CalendarLimits(IntEnum):
+    """Enum defining boundaries related to calendar dates.
+
+    Attributes:
+        MIN_DAYS (int): Lowest number of days in any month.
+        MIN_MONTHS (int): Lowest number of months in a year.
+        MAX_DAYS (int): Maximum number of days in any month.
+        MAX_MONTHS (int): Total number of months in a year.
+    """
+
+    MIN_DAYS = 1
+    MIN_MONTHS = 1
+    MAX_DAYS = 31
+    MAX_MONTHS = 12
+
+
+class SharedConstants(StrEnum):
+    """Enum for shared constants used across the application.
 
     Attributes:
         AGREE (str): Standard affirmative response ("yes").
@@ -125,49 +141,7 @@ class SharedConstants(Enum):
     EMPTY_STR = ""
 
 
-class SharedNumbers(Enum):
-    """Enum class for shared integers used across the application.
-
-    Attributes:
-        ZERO (int): Value for zero.
-        ONE (int): Value for one.
-        TWO (int): Value for two.
-        THREE (int): Value for three.
-        FOUR (int): Value for four.
-        FIVE (int): Value for five.
-        SIX (int): Value for six.
-        SEVEN (int): Value for seven.
-        EIGHT (int): Value for eight.
-        NINE (int): Value for nine.
-        TEN (int): Value for ten.
-        TWELVE (int): Value for twelve.
-        FIFTEEN (int): Value for fifteen.
-        THIRTY_ONE (int): Value for thirty one.
-        FIFTY (int): Value for fifty.
-        ONE_HUNDRED_FIFTY (int): Value for one hundred and fifty.
-        TWO_HUNDRED (int): Value for two hundred.
-    """
-
-    ZERO = 0
-    ONE = 1
-    TWO = 2
-    THREE = 3
-    FOUR = 4
-    FIVE = 5
-    SIX = 6
-    SEVEN = 7
-    EIGHT = 8
-    NINE = 9
-    TEN = 10
-    TWELVE = 12
-    FIFTEEN = 15
-    THIRTY_ONE = 31
-    FIFTY = 50
-    ONE_HUNDRED_FIFTY = 150
-    TWO_HUNDRED = 200
-
-
-class RegexPatterns(Enum):
+class RegexPatterns(StrEnum):
     """Regex patterns used for validating user input in usage_manager.
 
     Attributes:
@@ -181,13 +155,13 @@ class RegexPatterns(Enum):
     """
 
     YEARS = r"^\d{4}-\d{4}$"
-    DATE_REGEX = rf"^({SharedConstants.EUROPEAN.value}|{SharedConstants.AMERICAN.value})$"
-    DATE_INPUT_REGEX = rf"^({SharedConstants.DATE_AUTO.value}|{SharedConstants.DATE_MANUAL.value})$"
+    DATE_REGEX = rf"^({SharedConstants.EUROPEAN}|{SharedConstants.AMERICAN})$"
+    DATE_INPUT_REGEX = rf"^({SharedConstants.DATE_AUTO}|{SharedConstants.DATE_MANUAL})$"
     BLOCK = r".*"
 
 
-class ThermoInstances(Enum):
-    """Enum class for keys used to access instances in ThermoTracker.
+class ThermoInstances(StrEnum):
+    """Enum for keys used to access instances in ThermoTracker.
 
     These keys are used in the ThermoTracker.instances dictionary to retrieve
     specific manager instances.
@@ -205,8 +179,8 @@ class ThermoInstances(Enum):
     USAGE = "USAGE"
 
 
-class Labels(Enum):
-    """Enum class for labels used in logging and printing.
+class Labels(StrEnum):
+    """Enum for labels used in logging and printing.
 
     Attributes:
         REGISTRY (str): Label for registry-related files and logs.
@@ -217,8 +191,8 @@ class Labels(Enum):
     USAGE = "usage"
 
 
-class ManagerIdentifiers(Enum):
-    """Enum class for keys used to access instances in Excel manager classes.
+class ManagerIdentifiers(StrEnum):
+    """Enum for keys used to access instances in Excel manager classes.
 
     Attributes:
         REGISTRY_GENERATOR (str): Key for the RegistryGenerator instance
@@ -238,7 +212,7 @@ class ManagerIdentifiers(Enum):
 
 
 class RegistryExcelMeta(Enum):
-    """Enum class for metadata for the radiators registry Excel sheet.
+    """Enum for metadata for the radiators registry Excel sheet.
 
     Attributes:
         SHEET_NAME (str): Sheet name for the radiators registry file.
@@ -246,17 +220,21 @@ class RegistryExcelMeta(Enum):
         FREEZE_HEADERS (str): Cell reference for freezing panes in the sheet.
         COLS (tuple[str]): Column letters for the registry sheet.
         COL_EXTRA_SPACE (int): Extra space in the columns to improve visibility.
+        FIRST_DATA_ROW (int): The first non header row in the registry file.
+        RADIATOR_ROW (int): The row containing the name of each radiator.
     """
 
     SHEET_NAME = "Static Data"
     HEADERS = ("Radiator Name", "Radiator ID", "Coefficient")
     FREEZE_HEADERS = "A2"
     COLS = ("A", "B", "C")
-    COL_EXTRA_SPACE = SharedNumbers.FIVE.value
+    COL_EXTRA_SPACE = 5
+    FIRST_DATA_ROW = 2
+    RAD_NAME_ROW = 0
 
 
 class UsageExcelMeta(Enum):
-    """Enum class for metadata for the radiators usage Excel sheet.
+    """Enum for metadata for the radiators usage Excel sheet.
 
     Attributes:
         SHEET_NAME (str): Sheet name for the radiators usage file.
@@ -270,6 +248,9 @@ class UsageExcelMeta(Enum):
             in the usage sheet.
         NOTE_HORIZONTAL_ALIGNMENT (str): Horizontal alignment for the note cell
             in the usage sheet.
+        VS_NOTES_START_ROW (int): The row in which to write the valve setting
+            note.
+        BLANK_LINES (int): Extra three lines at the end of the radiator's block.
     """
 
     SHEET_NAME = "Radiators Usage"
@@ -286,13 +267,39 @@ class UsageExcelMeta(Enum):
     )
     FREEZE_HEADERS = "A2"
     COLS = ("A", "B", "C", "D", "E", "F", "G", "H", "I")
-    COL_EXTRA_SPACE = SharedNumbers.TEN.value
-    NOTES_COLUMN_SPACE = SharedNumbers.FIFTY.value
+    COL_EXTRA_SPACE = 10
+    NOTES_COLUMN_SPACE = 50
     NOTE_VERTICAL_ALIGNMENT = "top"
     NOTE_HORIZONTAL_ALIGNMENT = "left"
+    VS_NOTE_START_ROW = 1
+    BLANK_LINES = 3
 
 
-class OsPlatforms(Enum):
+class UsageFileCols(IntEnum):
+    """Enum storing the column indexes (1-based) for the Usage Excel sheet.
+
+    Attributes:
+        DATE (int): Column index for the date column.
+        NAME (int): Column index for the radiator name column.
+        COEFFICIENT (int): Column index for the coefficient column.
+        RAW_READING (int): Column index for the raw reading column.
+        ACTUAL_VALUE (int): Column index for the actual value column.
+        TOTAL (int): Column index for the total column.
+        VALVE_SETTING (int): Column index for the valve setting column.
+        NOTES (int): Column index for the notes column.
+    """
+
+    DATE = 1
+    NAME = 2
+    COEFFICIENT = 4
+    RAW_READING = 5
+    ACTUAL_VALUE = 6
+    TOTAL = 7
+    VALVE_SETTING = 8
+    NOTES = 9
+
+
+class OsPlatforms(StrEnum):
     """Enum for OS platform identifiers and open commands.
 
     Used to determine the current OS and the appropriate command to open files.
@@ -314,8 +321,8 @@ class OsPlatforms(Enum):
     LINUX_OPEN = "xdg-open"
 
 
-class UserMessages(Enum):
-    """Enum class for static user-facing messages and prompts.
+class UserMessages(StrEnum):
+    """Enum for static user-facing messages and prompts.
 
     Attributes:
         INTRO (str): Explains the purpose and workflow of the program.
@@ -360,15 +367,15 @@ class UserMessages(Enum):
                                 ### How It Works ###:
 
     1. Choose a directory where to save your data.
-    
+
     The program will create a folder, later filled with the following:
 
-    - **{Files.RADIATORS_REGISTRY.value}**: Stores radiator details (Names, IDs, and coefficients).
-    - **{Folders.USAGE_FOLDER.value}**: Subfolder for radiator usage files created over the years.
+    - **{Files.RADIATORS_REGISTRY}**: Stores radiator details (Names, IDs, and Coefficients).
+    - **{Folders.USAGE_FOLDER}**: Subfolder for radiator usage files created over the years.
 
-    Inside the {Folders.USAGE_FOLDER.value}, you will find:
-    
-    - **{Files.DEFAULT_USAGE_NAME.value}**: Main file where data is stored, following this format:
+    Inside the {Folders.USAGE_FOLDER}, you will find:
+
+    - **{Files.DEFAULT_USAGE_NAME}**: Main file where data is stored, following this format:
 
     | Date     | Radiator Name | Radiator ID | Coefficient | Raw Reading | Actual Value | Total | Valve Setting | Notes |
     |----------|---------------|-------------|-------------|-------------|--------------|-------|---------------|-------|
@@ -378,26 +385,26 @@ class UserMessages(Enum):
     | 01/04/25 |               |             |             |             |              | 69    |               |       |
 
     2. Enter radiator details (Name, ID, Coefficient).
-       They will be saved in {Files.RADIATORS_REGISTRY.value} for future use.
+       They will be saved in {Files.RADIATORS_REGISTRY} for future use.
 
     3. Configure your usage file by specifying:
-       - The years to include in the {Files.DEFAULT_USAGE_NAME.value}.
+       - The years to include in the {Files.DEFAULT_USAGE_NAME}.
        - The date format for recording readings.
        - Whether to input dates manually or automatically.
-    
+
     4. Input valve setting and raw reading for each radiator.
-       The program will calculate the actual heat usage for each radiator using the formula
+       The program will calculate the actual heat usage for each radiator using the formula:
        Actual Value = Raw Reading * Coefficient
 
     5. Optionally, add any notes about that day's readings.
        This section is for general comments or observations about the data entry session,
        not specific to a single radiator.
 
-    6. Your data is automatically saved and can be reviewed in {Files.DEFAULT_USAGE_NAME.value}.
+    6. Your data is automatically saved and can be reviewed in {Files.DEFAULT_USAGE_NAME}.
 
     **IMPORTANT**
-    If you move to a new home or change the number of radiators,  
-    please create a new folder and start a new setup.  
+    If you move to a new home or change the number of radiators,
+    please create a new folder and start a new setup.
     Do **not** reuse the old folder, as this may cause data inconsistencies.
 
     Press **Enter** to continue..."""
@@ -420,7 +427,7 @@ class UserMessages(Enum):
     FOLDER_RESET_PROMPT = dedent(
         """
                     NEED A NEW FOLDER
-        
+
     An Excel folder already exists from a previous run:
     - {folder_path}.
 
@@ -484,7 +491,7 @@ class UserMessages(Enum):
         f"""
                     RADIATORS REGISTRY GENERATION
 
-    We are now going to create the file {Files.RADIATORS_REGISTRY.value}.
+    We are now going to create the file {Files.RADIATORS_REGISTRY}.
 
     You will first be asked how many radiators you own.
 
@@ -521,12 +528,12 @@ class UserMessages(Enum):
         f"""
                     RADIATORS REGISTRY UPDATE
 
-    You decided to update the data in the {Files.RADIATORS_REGISTRY.value} file.
+    You decided to update the data in the {Files.RADIATORS_REGISTRY} file.
 
     For each registered radiator, you'll be shown its ID, and coefficient.
 
     Please confirm the information is correct, or choose to modify it as needed.
-    
+
     Press **Enter** to continue..."""
     )
 
@@ -534,8 +541,8 @@ class UserMessages(Enum):
         f"""
                     USAGE FILE CREATION
 
-    We're going to create the usage file: {Files.DEFAULT_USAGE_NAME.value}.
-    This file will be saved in the {Folders.USAGE_FOLDER.value} folder and
+    We're going to create the usage file: {Files.DEFAULT_USAGE_NAME}.
+    This file will be saved in the {Folders.USAGE_FOLDER} folder and
     will be used to track radiator heat readings.
 
     Here's how it works:
@@ -545,8 +552,8 @@ class UserMessages(Enum):
        allowing you to keep data for each heating season separate.
 
     2. You'll choose the date format for recording when readings are taken:
-       - {DateFormats.EU_LABEL.value} ({SharedConstants.EUROPEAN.value} format)
-       - {DateFormats.US_LABEL.value} ({SharedConstants.AMERICAN.value} format)
+       - {DateFormats.EU_LABEL} ({SharedConstants.EUROPEAN} format)
+       - {DateFormats.US_LABEL} ({SharedConstants.AMERICAN} format)
 
     3. You'll also decide whether to insert the dates manually or automatically.
        Manual input can be used if you want to record a date different from the current date
@@ -558,7 +565,7 @@ class UserMessages(Enum):
        or number set on the radiator valve.
        Then, you'll enter the raw reading from the HCA device.
        The program will calculate actual heat usage for each radiator.
-    
+
     5. Optionally, you can add any notes about that day's readings.
        This section is for general comments or observations about the
        data entry session.
@@ -584,9 +591,9 @@ class UserMessages(Enum):
 
     Type:
 
-    - '{SharedConstants.EUROPEAN.value}' for {DateFormats.EU_LABEL.value}
+    - '{SharedConstants.EUROPEAN}' for {DateFormats.EU_LABEL}
     or
-    - '{SharedConstants.AMERICAN.value:}' for {DateFormats.US_LABEL.value}
+    - '{SharedConstants.AMERICAN}' for {DateFormats.US_LABEL}
     """
     )
 
@@ -595,14 +602,14 @@ class UserMessages(Enum):
                     DATE INPUT MODE
 
     Should dates be entered automatically or manually?
-    Type '{SharedConstants.DATE_AUTO.value}' or '{SharedConstants.DATE_MANUAL.value}'
+    Type '{SharedConstants.DATE_AUTO}' or '{SharedConstants.DATE_MANUAL}'
     """
     )
 
     USAGE_DATA_ENTRY_INTRO = dedent(
         """
                     USAGE FILE DATA ENTRY
-    
+
     The usage file has been pre-filled with radiator data from your registry file.
 
     Next, depending on your configuration, dates may be added automatically or entered manually.
@@ -661,7 +668,7 @@ class UserMessages(Enum):
     ENTER_RAW_READINGS = dedent(
         """
                     RAW READINGS
-                                
+
     Please, enter the Raw Reading from the HCA device for each radiator.
     """
     )
@@ -671,7 +678,7 @@ class UserMessages(Enum):
                     MODIFY USAGE CONFIGURATIONS
 
     The usage file: {file_name} was created in a previous run. Below are the current configurations:
-    
+
     - File Name: {file_name} (e.g., change the years to create a new file for a new heating season).
     - Date Format: {date_format} (e.g., European or American format).
     - Date Input Mode: {date_input} (e.g., manual or automatic).

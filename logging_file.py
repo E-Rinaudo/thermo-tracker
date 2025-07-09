@@ -17,7 +17,7 @@ from constants import Files
 def logging_configuration() -> None:
     """Configures the logging settings for the application."""
     logging.basicConfig(
-        filename=Files.LOG_FILE.value,
+        filename=Files.LOG_FILE,
         level=logging.DEBUG,
         format="%(asctime)s - %(levelname)s - %(message)s",
     )

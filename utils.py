@@ -12,9 +12,9 @@ import constants as cons
 
 # Aliases for all the Enums of constants.py.
 CKeys = cons.ConfigKeys
-SCons = cons.SharedConstants
 Files = cons.Files
 Folds = cons.Folders
+SCons = cons.SharedConstants
 
 
 # endregion.
@@ -23,7 +23,7 @@ Folds = cons.Folders
 # region Methods Shared Among Modules.
 
 
-def display_user_info(msg: str, value: str = SCons.EMPTY_STR.value) -> None:
+def display_user_info(msg: str, value: str = SCons.EMPTY_STR) -> None:
     """Displays a message to the user and waits for them to press Enter.
 
     It is used for informational screens that require acknowledgment
@@ -55,15 +55,13 @@ def update_config_path(
         path_suffix: The file or folder name to append to the base path.
     """
     # Used to detect folder changes.
-    old_path = config_data.get(path_key.value)
+    old_path = config_data.get(path_key)
 
-    config_data[path_key.value] = os.path.join(
-        config_data[CKeys.EXCEL_FOLDER.value], path_suffix.value
-    )
+    config_data[path_key] = os.path.join(config_data[CKeys.EXCEL_FOLDER], path_suffix)
 
     # If the path has changed, mark the configuration as needing an update.
-    if old_path != config_data[path_key.value]:
-        config_update[SCons.UPDATE.value] = True
+    if old_path != config_data[path_key]:
+        config_update[SCons.UPDATE] = True
 
 
 def get_radiators_owned(config_data: dict[str, Any]) -> int:
@@ -75,7 +73,7 @@ def get_radiators_owned(config_data: dict[str, Any]) -> int:
     Returns:
         The number of radiators owned.
     """
-    return config_data[CKeys.RADIATORS_OWNED.value]
+    return config_data[CKeys.RADIATORS_OWNED]
 
 
 # endregion.

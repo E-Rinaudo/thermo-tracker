@@ -23,18 +23,20 @@ import utils
 from excel_utils import ExcelSharedMethods
 
 # Aliases for all the Enums of constants.py.
+CKeys = cons.ConfigKeys
+CLimits = cons.CalendarLimits
+DForm = cons.DateFormats
 Files = cons.Files
 Folds = cons.Folders
-CKeys = cons.ConfigKeys
-UserMsgs = cons.UserMessages
-ManId = cons.ManagerIdentifiers
-SCons = cons.SharedConstants
-SNums = cons.SharedNumbers
-DForm = cons.DateFormats
-RegexP = cons.RegexPatterns
 Labels = cons.Labels
-UsMeta = cons.UsageExcelMeta
+ManId = cons.ManagerIdentifiers
 OsPlatforms = cons.OsPlatforms
+RegexP = cons.RegexPatterns
+RegMeta = cons.RegistryExcelMeta
+SCons = cons.SharedConstants
+UFCols = cons.UsageFileCols
+UserMsgs = cons.UserMessages
+UsgMeta = cons.UsageExcelMeta
 
 # endregion.
 
@@ -94,7 +96,7 @@ class UsageManager:
         configurator = self._get_usage_configurator()
 
         # Check only if the folder exists; the file is created with it.
-        if not os.path.exists(self.config_data[CKeys.USAGE_FOLDER_PATH.value]):
+        if not os.path.exists(self.config_data[CKeys.USAGE_FOLDER_PATH]):
             configurator.usage_config_setup()
         else:
             if configurator.prompt_change_usage_config():
@@ -159,23 +161,21 @@ class UsageConfigurator:
     def usage_config_setup(self) -> None:
         """Collects config settings for the usage file on the first run."""
         logging.info("Starting first-time setup for the configurations of the usage file.")
-        utils.display_user_info(UserMsgs.USAGE_GENERATION.value)
+        utils.display_user_info(UserMsgs.USAGE_GENERATION)
 
         self._prompt_usage_name()
         self._prompt_date_format()
         self._prompt_date_input_mode()
-        self.config_update[SCons.UPDATE.value] = True
+        self.config_update[SCons.UPDATE] = True
 
     def _prompt_usage_name(self) -> None:
         """Prompts user to provide two years to use in the usage file name."""
         start_year = datetime.datetime.now().year
-        end_year = start_year + SNums.ONE.value
-        years = UserMsgs.YEARS_FILENAME_ENTRY.value.format(
-            usage_file=Files.DEFAULT_USAGE_NAME.value, start_year=start_year, end_year=end_year
+        end_year = start_year + 1
+        years = UserMsgs.YEARS_FILENAME_ENTRY.format(
+            usage_file=Files.DEFAULT_USAGE_NAME, start_year=start_year, end_year=end_year
         )
-        self._prompt_config_option(
-            years, RegexP.YEARS.value, CKeys.USAGE_NAME.value, embed_years=True
-        )
+        self._prompt_config_option(years, RegexP.YEARS, CKeys.USAGE_NAME, embed_years=True)
 
     def _prompt_config_option(
         self, prompt: str, regex: str, config_key: str, embed_years: bool = False
@@ -191,24 +191,24 @@ class UsageConfigurator:
         logging.info("Prompting config option for: %s", config_key)
 
         while True:
-            entry = pyip.inputStr(prompt, allowRegexes=[regex], blockRegexes=[RegexP.BLOCK.value])
+            entry = pyip.inputStr(prompt, allowRegexes=[regex], blockRegexes=[RegexP.BLOCK])
 
             if embed_years:
-                entry = Files.DEFAULT_USAGE_NAME.value.replace(Files.YEARS_PLACEHOLDER.value, entry)
+                entry = Files.DEFAULT_USAGE_NAME.replace(Files.YEARS_PLACEHOLDER, entry)
 
-            if pyip.inputYesNo(f"Confirm: {entry}? (yes/no)\n") == SCons.AGREE.value:
+            if pyip.inputYesNo(f"Confirm: {entry}? (yes/no)\n") == SCons.AGREE:
                 self.config_data[config_key] = entry
                 break
 
     def _prompt_date_format(self) -> None:
         """Prompts user to choose European or American date formats."""
-        date = UserMsgs.PROMPT_DATE_FORMAT.value
-        self._prompt_config_option(date, RegexP.DATE_REGEX.value, CKeys.DATE_FORMAT.value)
+        date = UserMsgs.PROMPT_DATE_FORMAT
+        self._prompt_config_option(date, RegexP.DATE_REGEX, CKeys.DATE_FORMAT)
 
     def _prompt_date_input_mode(self) -> None:
         """Prompts user to choose how to enter dates into the Excel file."""
-        mode = UserMsgs.PROMPT_DATE_INPUT_MODE.value
-        self._prompt_config_option(mode, RegexP.DATE_INPUT_REGEX.value, CKeys.DATE_INPUT_MODE.value)
+        mode = UserMsgs.PROMPT_DATE_INPUT_MODE
+        self._prompt_config_option(mode, RegexP.DATE_INPUT_REGEX, CKeys.DATE_INPUT_MODE)
 
     def prompt_change_usage_config(self) -> bool:
         """Prompts the user whether to modify the usage configurations.
@@ -217,26 +217,26 @@ class UsageConfigurator:
             True if the user wants to modify the configuration; False otherwise.
         """
         logging.info("Prompting user whether to modify existing usage file configurations.")
-        modify = UserMsgs.CHANGE_USAGE_CONFIG.value.format(
-            file_name=self.config_data[CKeys.USAGE_NAME.value],
-            date_format=self.config_data[CKeys.DATE_FORMAT.value],
-            date_input=self.config_data[CKeys.DATE_INPUT_MODE.value],
+        modify = UserMsgs.CHANGE_USAGE_CONFIG.format(
+            file_name=self.config_data[CKeys.USAGE_NAME],
+            date_format=self.config_data[CKeys.DATE_FORMAT],
+            date_input=self.config_data[CKeys.DATE_INPUT_MODE],
         )
 
-        return pyip.inputYesNo(modify) == SCons.AGREE.value
+        return pyip.inputYesNo(modify) == SCons.AGREE
 
     def prompt_usage_config_updates(self) -> None:
         """Prompts the user to update existing usage file configurations."""
         logging.info("User decided to modify the usage file configurations.")
         config_items = [
-            ("usage filename", CKeys.USAGE_NAME.value, self._prompt_usage_name),
-            ("date format", CKeys.DATE_FORMAT.value, self._prompt_date_format),
-            ("date input mode", CKeys.DATE_INPUT_MODE.value, self._prompt_date_input_mode),
+            ("usage filename", CKeys.USAGE_NAME, self._prompt_usage_name),
+            ("date format", CKeys.DATE_FORMAT, self._prompt_date_format),
+            ("date input mode", CKeys.DATE_INPUT_MODE, self._prompt_date_input_mode),
         ]
 
         for label, key, update_method in config_items:
             prompt = f"Change {label}? (yes/no)\nCurrent: {self.config_data[key]}\n"
-            if pyip.inputYesNo(prompt) == SCons.AGREE.value:
+            if pyip.inputYesNo(prompt) == SCons.AGREE:
                 self._make_config_change(update_method)
 
     def _make_config_change(self, update_method: Callable[[], None]) -> None:
@@ -246,7 +246,7 @@ class UsageConfigurator:
             update_method: The method to execute the configuration update.
         """
         update_method()
-        self.config_update[SCons.UPDATE.value] = True
+        self.config_update[SCons.UPDATE] = True
 
 
 # endregion.
@@ -280,7 +280,7 @@ class UsageGenerator:
         self.config_update = config_update
         self.worksheet = cast(openpyxl.worksheet.worksheet.Worksheet, None)  # Lazy initialization.
         self.excel_shared = cast(ExcelSharedMethods, None)  # Lazy initialization.
-        self.file_path = SCons.EMPTY_STR.value  # Lazy initialization.
+        self.file_path = SCons.EMPTY_STR  # Lazy initialization.
 
     def update_file_path(self) -> None:
         """Updates the file path based on the current configuration data.
@@ -289,8 +289,8 @@ class UsageGenerator:
         configuration data and assigns it to the file_path attribute.
         """
         self.file_path = os.path.join(
-            self.config_data[CKeys.USAGE_FOLDER_PATH.value],
-            self.config_data[CKeys.USAGE_NAME.value],
+            self.config_data[CKeys.USAGE_FOLDER_PATH],
+            self.config_data[CKeys.USAGE_NAME],
         )
 
     def manage_usage(self) -> None:
@@ -308,7 +308,7 @@ class UsageGenerator:
 
     def _ensure_usage_folder(self) -> None:
         """Creates the usage Excel files folder if it doesn't exist."""
-        folder_path = self.config_data[CKeys.USAGE_FOLDER_PATH.value]
+        folder_path = self.config_data[CKeys.USAGE_FOLDER_PATH]
 
         if not os.path.exists(folder_path):
             logging.info("Creating usage folder.")
@@ -335,8 +335,8 @@ class UsageGenerator:
         the file.
         """
         if not os.path.exists(self.file_path):
-            self.excel_shared.customize_worksheet(Labels.USAGE.value, UsMeta)
-            self.worksheet.append(UsMeta.HEADERS.value)
+            self.excel_shared.customize_worksheet(Labels.USAGE, UsgMeta)
+            self.worksheet.append(UsgMeta.HEADERS.value)
 
     def _populate_usage(self) -> None:
         """Populates the usage file with new data for the current session."""
@@ -361,12 +361,12 @@ class UsageGenerator:
         # new file or session. Any old values in the config are overwritten, so
         # there is no risk of carrying over incorrect row indices from previous
         # files. No explicit config cleanup is needed.
-        start_row = self.worksheet.max_row + SNums.ONE.value
-        last_start_row = self.config_data.get(CKeys.START_ROW.value, start_row)
+        start_row = self.worksheet.max_row + 1
+        last_start_row = self.config_data.get(CKeys.START_ROW, start_row)
 
-        self.config_data[CKeys.START_ROW.value] = start_row
-        self.config_data[CKeys.LAST_START_ROW.value] = last_start_row
-        self.config_update[SCons.UPDATE.value] = True
+        self.config_data[CKeys.START_ROW] = start_row
+        self.config_data[CKeys.LAST_START_ROW] = last_start_row
+        self.config_update[SCons.UPDATE] = True
 
     def _fill_registry_data(self) -> None:
         """Appends radiator data (Name, ID, Coefficient) from registry file.
@@ -377,10 +377,12 @@ class UsageGenerator:
         registry_worksheet = self._get_registry_worksheet()
 
         logging.info("Filling usage file with registry data.")
-        for row in registry_worksheet.iter_rows(min_row=SNums.TWO.value, values_only=True):
-            empty_row = self.worksheet.max_row + SNums.ONE.value
+        for row in registry_worksheet.iter_rows(
+            min_row=RegMeta.FIRST_DATA_ROW.value, values_only=True
+        ):
+            empty_row = self.worksheet.max_row + 1
 
-            for col_offset, value in enumerate(row, start=SNums.TWO.value):
+            for col_offset, value in enumerate(row, start=2):
                 self.worksheet.cell(row=empty_row, column=col_offset, value=value)
 
     def _get_registry_worksheet(self) -> openpyxl.worksheet.worksheet.Worksheet:
@@ -389,12 +391,12 @@ class UsageGenerator:
         Returns:
             The registry worksheet.
         """
-        registry_workbook = openpyxl.load_workbook(self.config_data[CKeys.REGISTRY_FILE.value])
+        registry_workbook = openpyxl.load_workbook(self.config_data[CKeys.REGISTRY_FILE])
         return cast(openpyxl.worksheet.worksheet.Worksheet, registry_workbook.active)
 
     def _display_data_entry_intro(self) -> None:
         """Explains how the  data entry process for the usage file works."""
-        utils.display_user_info(UserMsgs.USAGE_DATA_ENTRY_INTRO.value)
+        utils.display_user_info(UserMsgs.USAGE_DATA_ENTRY_INTRO)
 
     def _fill_dates(self) -> None:
         """Fills the date column for each radiator row and for the total row.
@@ -404,16 +406,16 @@ class UsageGenerator:
         worksheet, plus one additional date entry for the total row that
         follows the radiator data block.
         """
-        if self.config_data[CKeys.DATE_INPUT_MODE.value] == SCons.DATE_AUTO.value:
+        if self.config_data[CKeys.DATE_INPUT_MODE] == SCons.DATE_AUTO:
             date = self._get_date_automatically()
         else:
             date = self._get_date_manually()
 
         radiators_owned, start_row = self._get_usage_block_info()
         self._fill_col(
-            rows=range(start_row, radiators_owned + start_row + SNums.ONE.value),
+            rows=range(start_row, radiators_owned + start_row + 1),
             get_value=lambda row: date,
-            col=SNums.ONE.value,
+            col=UFCols.DATE,
         )
 
     def _get_date_automatically(self) -> str:
@@ -433,10 +435,10 @@ class UsageGenerator:
         Returns:
             The formatted date string.
         """
-        if self.config_data[CKeys.DATE_FORMAT.value] == SCons.EUROPEAN.value:
-            return date.strftime(DForm.EU_FORMAT.value)
+        if self.config_data[CKeys.DATE_FORMAT] == SCons.EUROPEAN:
+            return date.strftime(DForm.EU_FORMAT)
 
-        return date.strftime(DForm.US_FORMAT.value)
+        return date.strftime(DForm.US_FORMAT)
 
     def _get_date_manually(self) -> str:
         """Prompts the user for a date and formats it as configured.
@@ -445,7 +447,7 @@ class UsageGenerator:
             The formatted date string.
         """
         logging.info("Prompting user for manual date entry.")
-        print(UserMsgs.ENTER_MANUAL_DATE.value)
+        print(UserMsgs.ENTER_MANUAL_DATE)
 
         while True:
             day, month, year = self._prompt_date()
@@ -463,14 +465,14 @@ class UsageGenerator:
             A tuple with the three parts of the date.
         """
         day = pyip.inputInt(
-            f"Day ({SNums.ONE.value} - {SNums.THIRTY_ONE.value}): ",
-            min=SNums.ONE.value,
-            max=SNums.THIRTY_ONE.value,
+            f"Day ({CLimits.MIN_DAYS} - {CLimits.MAX_DAYS}): ",
+            min=CLimits.MIN_DAYS,
+            max=CLimits.MAX_DAYS,
         )
         month = pyip.inputInt(
-            f"Month ({SNums.ONE.value} - {SNums.TWELVE.value}): ",
-            min=SNums.ONE.value,
-            max=SNums.TWELVE.value,
+            f"Month ({CLimits.MIN_MONTHS} - {CLimits.MAX_MONTHS}): ",
+            min=CLimits.MIN_MONTHS,
+            max=CLimits.MAX_MONTHS,
         )
         year = pyip.inputInt(f"Year (e.g., {datetime.datetime.now().year}): ")
         return day, month, year
@@ -504,7 +506,7 @@ class UsageGenerator:
         """
         print(f"The date you provided is: {date}.")
 
-        if pyip.inputYesNo("Confirm this date? (yes/no)\n") == SCons.AGREE.value:
+        if pyip.inputYesNo("Confirm this date? (yes/no)\n") == SCons.AGREE:
             return date
 
         return None
@@ -517,7 +519,7 @@ class UsageGenerator:
                 current run.
         """
         radiators_owned = utils.get_radiators_owned(self.config_data)
-        start_row = self.config_data[CKeys.START_ROW.value]
+        start_row = self.config_data[CKeys.START_ROW]
         return radiators_owned, start_row
 
     def _fill_col(
@@ -553,20 +555,20 @@ class UsageGenerator:
         After entry, the user is shown a recap of all valve settings and
         can make corrections.
         """
-        utils.display_user_info(UserMsgs.VALVE_SETTING_ENTRY.value)
+        utils.display_user_info(UserMsgs.VALVE_SETTING_ENTRY)
         logging.info("Prompting user for valve setting.")
 
         radiators_owned, start_row = self._get_usage_block_info()
         self._fill_col(
             rows=range(start_row, start_row + radiators_owned),
             get_value=lambda row: pyip.inputStr(
-                f"Valve Setting for {self.worksheet.cell(row=row, column=SNums.TWO.value).value}: ",
+                f"Valve Setting for {self.worksheet.cell(row=row, column=UFCols.NAME).value}: ",
             ),
-            col=SNums.EIGHT.value,
+            col=UFCols.VALVE_SETTING,
         )
 
         self._recap_and_edit_column(
-            "valve setting", SNums.EIGHT.value, self._enter_initial_valve_settings
+            "valve setting", UFCols.VALVE_SETTING, self._enter_initial_valve_settings
         )
 
     def _recap_and_edit_column(self, label: str, col: int, method: Callable[[], None]) -> None:
@@ -586,12 +588,12 @@ class UsageGenerator:
 
         radiators_owned, start_row = self._get_usage_block_info()
         for row in range(start_row, start_row + radiators_owned):
-            radiator_name = self.worksheet.cell(row=row, column=SNums.TWO.value).value
+            radiator_name = self.worksheet.cell(row=row, column=UFCols.NAME).value
             setting = self.worksheet.cell(row=row, column=col).value
             print(f"- {radiator_name} {label}: {setting}")
 
         change_prompt = f"\nWould you like to modify any of these {label}s? (yes/no)\n"
-        if pyip.inputYesNo(change_prompt) == SCons.AGREE.value:
+        if pyip.inputYesNo(change_prompt) == SCons.AGREE:
             method()
         else:
             print(f"✅ Great! Your {label}s have been saved.")
@@ -605,18 +607,20 @@ class UsageGenerator:
         note = Comment(
             "NOTE:\nNumbers saved as text. Excel warning expected.",
             "Thermo Tracker",
-            height=SNums.ONE_HUNDRED_FIFTY.value,
-            width=SNums.TWO_HUNDRED.value,
+            height=150,
+            width=200,
         )
-        self.worksheet.cell(row=SNums.ONE.value, column=SNums.EIGHT.value).comment = note
+        self.worksheet.cell(
+            row=UsgMeta.VS_NOTE_START_ROW.value, column=UFCols.VALVE_SETTING
+        ).comment = note
 
     def _update_valve_setting(self) -> None:
         """Runs the sequence to update the valve settings for the radiators."""
-        utils.display_user_info(UserMsgs.VALVE_SETTING_UPDATE.value)
+        utils.display_user_info(UserMsgs.VALVE_SETTING_UPDATE)
         logging.info("Reviewing valve settings with the user.")
 
         radiators_owned, start_row = self._get_usage_block_info()
-        last_start_row = self.config_data[CKeys.LAST_START_ROW.value]
+        last_start_row = self.config_data[CKeys.LAST_START_ROW]
 
         for i in range(radiators_owned):
             old_row = last_start_row + i
@@ -649,8 +653,8 @@ class UsageGenerator:
         Returns:
             A tuple containing the radiator name and its valve setting.
         """
-        radiator_name = self.worksheet.cell(row=old_row, column=SNums.TWO.value).value
-        current_valve_setting = self.worksheet.cell(row=old_row, column=SNums.EIGHT.value).value
+        radiator_name = self.worksheet.cell(row=old_row, column=UFCols.NAME).value
+        current_valve_setting = self.worksheet.cell(row=old_row, column=UFCols.VALVE_SETTING).value
 
         return cast(str, radiator_name), cast(str, current_valve_setting)
 
@@ -664,11 +668,11 @@ class UsageGenerator:
         Returns:
             The new valve setting if the user chooses to update; None otherwise.
         """
-        change_prompt = UserMsgs.PROMPT_VALVE_UPDATE.value.format(
+        change_prompt = UserMsgs.PROMPT_VALVE_UPDATE.format(
             radiator_name=radiator_name, current_valve_setting=current_valve_setting
         )
 
-        if pyip.inputYesNo(change_prompt) == SCons.AGREE.value:
+        if pyip.inputYesNo(change_prompt) == SCons.AGREE:
             return pyip.inputStr(f"\nEnter new valve setting for '{radiator_name}': ")
 
         return None
@@ -688,8 +692,8 @@ class UsageGenerator:
         """
         print(f"\nCurrent value: {current_valve_setting}. New value: {new_valve_setting}")
 
-        if pyip.inputYesNo("Apply this change? (yes/no)\n") == SCons.AGREE.value:
-            self.worksheet.cell(row=new_row, column=SNums.EIGHT.value, value=new_valve_setting)
+        if pyip.inputYesNo("Apply this change? (yes/no)\n") == SCons.AGREE:
+            self.worksheet.cell(row=new_row, column=UFCols.VALVE_SETTING, value=new_valve_setting)
             return True
         return False
 
@@ -700,7 +704,7 @@ class UsageGenerator:
             new_row: The worksheet row index to write the data in.
             current_valve_setting: The existing valve setting to retain.
         """
-        self.worksheet.cell(row=new_row, column=SNums.EIGHT.value, value=current_valve_setting)
+        self.worksheet.cell(row=new_row, column=UFCols.VALVE_SETTING, value=current_valve_setting)
 
     def _get_raw_readings(self) -> None:
         """Writes raw readings to the appropriate column for each radiator.
@@ -709,18 +713,18 @@ class UsageGenerator:
         can make corrections.
         """
         logging.info("Prompting user for raw readings.")
-        print(UserMsgs.ENTER_RAW_READINGS.value)
+        print(UserMsgs.ENTER_RAW_READINGS)
 
         radiators_owned, start_row = self._get_usage_block_info()
         self._fill_col(
             rows=range(start_row, start_row + radiators_owned),
             get_value=lambda row: pyip.inputInt(
-                f"Raw Reading for {self.worksheet.cell(row=row, column=SNums.TWO.value).value}: "
+                f"Raw Reading for {self.worksheet.cell(row=row, column=UFCols.NAME).value}: "
             ),
-            col=SNums.FIVE.value,
+            col=UFCols.RAW_READING,
         )
 
-        self._recap_and_edit_column("raw reading", SNums.FIVE.value, self._get_raw_readings)
+        self._recap_and_edit_column("raw reading", UFCols.RAW_READING, self._get_raw_readings)
 
     def _get_actual_values(self) -> None:
         """Writes the actual value for each radiator."""
@@ -729,7 +733,7 @@ class UsageGenerator:
         self._fill_col(
             rows=range(start_row, start_row + radiators_owned),
             get_value=self._compute_actual_value,
-            col=SNums.SIX.value,
+            col=UFCols.ACTUAL_VALUE,
         )
 
     def _compute_actual_value(self, row: int) -> float | int:
@@ -741,8 +745,10 @@ class UsageGenerator:
         Returns:
             The computed actual value as a float.
         """
-        coefficient = cast(float | int, self.worksheet.cell(row=row, column=SNums.FOUR.value).value)
-        raw_reading = cast(int, self.worksheet.cell(row=row, column=SNums.FIVE.value).value)
+        coefficient = cast(
+            float | int, self.worksheet.cell(row=row, column=UFCols.COEFFICIENT).value
+        )
+        raw_reading = cast(int, self.worksheet.cell(row=row, column=UFCols.RAW_READING).value)
         return coefficient * raw_reading
 
     def _get_total(self) -> None:
@@ -751,15 +757,15 @@ class UsageGenerator:
         Sums the 'Actual Value' column for the current data block and
         writes the total to the worksheet.
         """
-        logging.info('Writing the total to the usage file.')
+        logging.info("Writing the total to the usage file.")
         radiators_owned, start_row = self._get_usage_block_info()
         total_value = sum(
-            cast(float | int, self.worksheet.cell(row=row, column=SNums.SIX.value).value)
+            cast(float | int, self.worksheet.cell(row=row, column=UFCols.ACTUAL_VALUE).value)
             for row in range(start_row, start_row + radiators_owned)
         )
         self.worksheet.cell(
             row=start_row + radiators_owned,  # Write it below the last radiator's data row.
-            column=SNums.SEVEN.value,
+            column=UFCols.TOTAL,
             value=total_value,
         )
 
@@ -767,7 +773,7 @@ class UsageGenerator:
         """Prompts the user to add a note for the radiators block."""
         write_note = "\nWould you like to add a note for today's session? (yes/no)\n"
 
-        if pyip.inputYesNo(write_note) == SCons.AGREE.value:
+        if pyip.inputYesNo(write_note) == SCons.AGREE:
             note = pyip.inputStr("\nEnter your note:\n")
         else:
             note = "No additional notes."
@@ -780,9 +786,9 @@ class UsageGenerator:
         radiators_owned, start_row = self._get_usage_block_info()
         self.worksheet.merge_cells(
             start_row=start_row,
-            end_row=start_row + radiators_owned - SNums.ONE.value,
-            start_column=SNums.NINE.value,
-            end_column=SNums.NINE.value,
+            end_row=start_row + radiators_owned - 1,
+            start_column=UFCols.NOTES,
+            end_column=UFCols.NOTES,
         )
 
     def _insert_note(self, note: str) -> None:
@@ -791,35 +797,35 @@ class UsageGenerator:
         Args:
             note: The note to write.
         """
-        logging.info('Adding a note to the usage file.')
+        logging.info("Adding a note to the usage file.")
         cell = self.worksheet.cell(
-            row=self.config_data[CKeys.START_ROW.value], column=SNums.NINE.value, value=note
+            row=self.config_data[CKeys.START_ROW], column=UFCols.NOTES, value=note
         )
         cell.alignment = Alignment(
             wrap_text=True,
-            vertical=UsMeta.NOTE_VERTICAL_ALIGNMENT.value,
-            horizontal=UsMeta.NOTE_HORIZONTAL_ALIGNMENT.value,
+            vertical=UsgMeta.NOTE_VERTICAL_ALIGNMENT.value,
+            horizontal=UsgMeta.NOTE_HORIZONTAL_ALIGNMENT.value,
         )
 
     def _add_blank_lines(self) -> None:
         """Adds three blank lines to the worksheet for improved readability."""
         logging.info("Adding three blank lines to the usage file.")
-        for _ in range(SNums.THREE.value):
-            empty_row = self.worksheet.max_row + SNums.ONE.value
-            self.worksheet.cell(row=empty_row, column=SNums.ONE.value, value=SCons.EMPTY_STR.value)
+        for _ in range(UsgMeta.BLANK_LINES.value):
+            empty_row = self.worksheet.max_row + 1
+            self.worksheet.cell(row=empty_row, column=UFCols.DATE, value=SCons.EMPTY_STR)
 
     def save_usage(self) -> None:
         """Saves the usage workbook to the specified file path."""
-        self.excel_shared.save_workbook(self.file_path, Labels.USAGE.value)
+        self.excel_shared.save_workbook(self.file_path, Labels.USAGE)
 
     def open_usage(self) -> None:
         """Prompts the user to open the usage file.
 
         If the user agrees, it opens the file with the default app.
         """
-        open_prompt = UserMsgs.OPEN_USAGE.value
+        open_prompt = UserMsgs.OPEN_USAGE
 
-        if pyip.inputYesNo(open_prompt) == SCons.AGREE.value:
+        if pyip.inputYesNo(open_prompt) == SCons.AGREE:
             self._open_based_on_system()
             logging.info("Opening the Excel usage file for the user to review it.")
 
@@ -828,14 +834,12 @@ class UsageGenerator:
 
         The opening process depends on the user's operating system.
         """
-        if sys.platform.startswith(OsPlatforms.MACOS.value):
-            os.system(f'{OsPlatforms.MACOS_OPEN.value} "{self.file_path}"')
-        elif sys.platform.startswith(OsPlatforms.WINDOWS.value):
-            subprocess.run(
-                [OsPlatforms.WINDOWS_OPEN.value, self.file_path], shell=True, check=False
-            )
-        elif sys.platform.startswith(OsPlatforms.LINUX.value):
-            os.system(f'{OsPlatforms.LINUX_OPEN.value} "{self.file_path}"')
+        if sys.platform.startswith(OsPlatforms.MACOS):
+            os.system(f'{OsPlatforms.MACOS_OPEN} "{self.file_path}"')
+        elif sys.platform.startswith(OsPlatforms.WINDOWS):
+            subprocess.run([OsPlatforms.WINDOWS_OPEN, self.file_path], shell=True, check=False)
+        elif sys.platform.startswith(OsPlatforms.LINUX):
+            os.system(f'{OsPlatforms.LINUX_OPEN} "{self.file_path}"')
         else:
             print("Automatic file opening is not supported on this OS.")
 

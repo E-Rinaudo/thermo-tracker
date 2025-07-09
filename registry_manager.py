@@ -24,14 +24,13 @@ import utils
 from excel_utils import ExcelSharedMethods
 
 # Aliases for all the Enums of constants.py.
-Files = cons.Files
 CKeys = cons.ConfigKeys
-RegMeta = cons.RegistryExcelMeta
-UserMsgs = cons.UserMessages
-SCons = cons.SharedConstants
-SNums = cons.SharedNumbers
+Files = cons.Files
 Labels = cons.Labels
 ManId = cons.ManagerIdentifiers
+RegMeta = cons.RegistryExcelMeta
+SCons = cons.SharedConstants
+UserMsgs = cons.UserMessages
 
 
 # endregion.
@@ -81,7 +80,7 @@ class RegistryManager:
         file exists, prompts the user to confirm whether to update the
         radiators data (ID, Coefficient).
         """
-        registry_path = self.config_data[CKeys.REGISTRY_FILE.value]
+        registry_path = self.config_data[CKeys.REGISTRY_FILE]
 
         if not os.path.exists(registry_path):
             self._generate_registry(registry_path)
@@ -173,10 +172,10 @@ class RegistryGenerator:
         input, and customizes the Excel sheet.
         """
         logging.info("Creating the radiators registry file.")
-        utils.display_user_info(UserMsgs.REGISTRY_GENERATION.value)
+        utils.display_user_info(UserMsgs.REGISTRY_GENERATION)
 
         self._populate_registry_worksheet()
-        self.excel_shared.customize_worksheet(Labels.REGISTRY.value, RegMeta)
+        self.excel_shared.customize_worksheet(Labels.REGISTRY, RegMeta)
 
     def _populate_registry_worksheet(self) -> None:
         """Runs the process that populates the worksheet with radiator data.
@@ -200,9 +199,9 @@ class RegistryGenerator:
         while True:
             radiators_owned = pyip.inputNum("\nNumber of radiators to register? (Use digits)\n")
             confirm_num = f"Confirm {radiators_owned} radiators? (yes/no)\n"
-            if pyip.inputYesNo(confirm_num) == SCons.AGREE.value:
-                self.config_data[CKeys.RADIATORS_OWNED.value] = radiators_owned
-                self.config_update[SCons.UPDATE.value] = True
+            if pyip.inputYesNo(confirm_num) == SCons.AGREE:
+                self.config_data[CKeys.RADIATORS_OWNED] = radiators_owned
+                self.config_update[SCons.UPDATE] = True
                 return radiators_owned
 
     def _collect_radiator_data(self, radiators_owned: int) -> list[list[object]]:
@@ -218,7 +217,7 @@ class RegistryGenerator:
 
         registry_data = []
 
-        for radiator_num in range(SNums.ONE.value, radiators_owned + SNums.ONE.value):
+        for radiator_num in range(1, radiators_owned + 1):
 
             while True:
                 name, radiator_id, coefficient = self._prompt_radiator_entry(radiator_num)
@@ -263,7 +262,7 @@ class RegistryGenerator:
             print(f"- {header}: {value}")
 
         radiator_confirmation = f"\nConfirm Radiator {radiator_num}? (yes/no)\n"
-        return pyip.inputYesNo(radiator_confirmation) == SCons.AGREE.value
+        return pyip.inputYesNo(radiator_confirmation) == SCons.AGREE
 
     def save_registry(self, registry_path: str) -> None:
         """Saves the registry workbook to the specified file path.
@@ -271,7 +270,7 @@ class RegistryGenerator:
         Args:
             registry_path: Path where the registry file will be saved.
         """
-        self.excel_shared.save_workbook(registry_path, Labels.REGISTRY.value)
+        self.excel_shared.save_workbook(registry_path, Labels.REGISTRY)
 
 
 # endregion.
@@ -313,14 +312,14 @@ class RegistryUpdater:
         table_string = self.get_radiator_registry_table()
 
         if self._prompt_update_registry(registry_path, table_string):
-            utils.display_user_info(UserMsgs.REGISTRY_UPDATE_DESCRIPTION.value)
+            utils.display_user_info(UserMsgs.REGISTRY_UPDATE_DESCRIPTION)
             logging.info("The user decided to update the registry file data.")
 
             # User can only update ID and Coefficient for each radiator.
             # Radiator names are treated as unique identifiers and are not editable.
             # Allowing name changes would break the mapping between registry data
             # and usage data, potentially causing data integrity issues.
-            for row in self.worksheet.iter_rows(min_row=SNums.TWO.value):
+            for row in self.worksheet.iter_rows(min_row=RegMeta.FIRST_DATA_ROW.value):
                 self._recap_radiator_data(row)
                 self._prompt_radiator_update(row)
 
@@ -334,10 +333,10 @@ class RegistryUpdater:
         Returns:
             True if the user agrees to update the registry; False otherwise.
         """
-        update_prompt = UserMsgs.REGISTRY_UPDATE_RECAP.value.format(
+        update_prompt = UserMsgs.REGISTRY_UPDATE_RECAP.format(
             registry_path=registry_path, registry_table=table_string
         )
-        return pyip.inputYesNo(update_prompt) == SCons.AGREE.value
+        return pyip.inputYesNo(update_prompt) == SCons.AGREE
 
     def get_radiator_registry_table(self) -> str:
         """Provides a formatted table of all radiators registry data.
@@ -346,32 +345,35 @@ class RegistryUpdater:
             The formatted table.
         """
         data = [
-            list(row) for row in self.worksheet.iter_rows(min_row=SNums.TWO.value, values_only=True)
+            list(row)
+            for row in self.worksheet.iter_rows(
+                min_row=RegMeta.FIRST_DATA_ROW.value, values_only=True
+            )
         ]
         headers = RegMeta.HEADERS.value
         return tabulate(data, headers=headers, tablefmt="github")
 
     def _recap_radiator_data(self, row: tuple[Cell | MergedCell, ...]) -> None:
-        """Recaps the data (ID, Coeffiecient) for a specific radiator.
+        """Recaps the data (ID, Coefficient) for a specific radiator.
 
         Args:
             row: The list of cell objects representing the radiator's data.
         """
-        radiator_name = row[SNums.ZERO.value].value
+        radiator_name = row[RegMeta.RAD_NAME_ROW.value].value
         print(f"\nRecap for Radiator {radiator_name}:")
         self._handle_editable_fields(row, lambda header, cell: print(f"- {header}: {cell.value}"))
 
     def _handle_editable_fields(
         self, row: tuple[Cell | MergedCell, ...], callback: Callable[[str, Cell | MergedCell], None]
     ) -> None:
-        """Applies a callback to each editable field in a radiator row.
+        """Applies a callback to editable fields (ID, Coefficient) in a row.
 
         Args:
             row: The list of cell objects representing the radiator's data.
             callback: Function to apply to each editable field.
         """
-        headers = RegMeta.HEADERS.value[SNums.ONE.value :]
-        cells = row[SNums.ONE.value :]
+        headers = RegMeta.HEADERS.value[1:]
+        cells = row[1:]
         for header, cell in zip(headers, cells):
             callback(header, cell)
 
@@ -381,7 +383,7 @@ class RegistryUpdater:
         Args:
             row: The list of cell objects representing the radiator's data.
         """
-        if pyip.inputYesNo("\nUpdate any of these data? (yes/no)\n") == SCons.AGREE.value:
+        if pyip.inputYesNo("\nUpdate any of these data? (yes/no)\n") == SCons.AGREE:
             self._handle_editable_fields(
                 row, lambda header, cell: self._prompt_header_update(row, header, cell)
             )
@@ -395,13 +397,13 @@ class RegistryUpdater:
             header: The header name of the column being modified.
             cell: The cell object to be modified.
         """
-        radiator_name = row[SNums.ZERO.value].value
+        radiator_name = row[RegMeta.RAD_NAME_ROW.value].value
         print(f"\n{radiator_name} current value for '{header}': {cell.value}")
 
         update_successful = False
 
         while not update_successful:
-            if pyip.inputYesNo(f"Update '{header}'? (yes/no)\n") == SCons.AGREE.value:
+            if pyip.inputYesNo(f"Update '{header}'? (yes/no)\n") == SCons.AGREE:
                 new_value = self._prompt_cell_value(header, cell)
                 update_successful = self._confirm_to_update(cell, new_value)
             else:
@@ -445,14 +447,14 @@ class RegistryUpdater:
         """
         print(f"\nOld value: {cell.value} | New value: {new_value}")
 
-        if pyip.inputYesNo("Confirm modification? (yes/no)\n") == SCons.AGREE.value:
+        if pyip.inputYesNo("Confirm modification? (yes/no)\n") == SCons.AGREE:
             self.worksheet[cell.coordinate].value = new_value
             return True
         return False
 
     def save_changes(self) -> None:
         """Saves all changes made to the radiators registry to its path."""
-        self.excel_shared.save_workbook(self.registry_path, Labels.REGISTRY.value)
+        self.excel_shared.save_workbook(self.registry_path, Labels.REGISTRY)
 
 
 # endregion.

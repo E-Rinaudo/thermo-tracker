@@ -19,11 +19,11 @@ import utils
 from config_manager import ConfigManager
 
 # Aliases for all the Enums of constants.py.
-Files = cons.Files
 CKeys = cons.ConfigKeys
-UserMsgs = cons.UserMessages
-SCons = cons.SharedConstants
+Files = cons.Files
 Folds = cons.Folders
+SCons = cons.SharedConstants
+UserMsgs = cons.UserMessages
 
 
 # endregion.
@@ -53,7 +53,7 @@ class ExcelFolderManager:
         """Initializes attributes and creates a FolderGenerator instance."""
         self.config_data = config_data
         self.generator = FolderGenerator(self.config_data, config_update)
-        self.folder_path = SCons.EMPTY_STR.value  # Lazy initialization.
+        self.folder_path = SCons.EMPTY_STR  # Lazy initialization.
 
     def update_folder_path(self) -> None:
         """Updates the folder path based on the current configuration data.
@@ -61,7 +61,7 @@ class ExcelFolderManager:
         Retrieves the folder path from the configuration data and
         assigns it to the folder_path attribute.
         """
-        self.folder_path = self.config_data[CKeys.EXCEL_FOLDER.value]
+        self.folder_path = self.config_data[CKeys.EXCEL_FOLDER]
 
     def handle_folder_selection(self) -> None:
         """Handles the folder selection process.
@@ -71,7 +71,7 @@ class ExcelFolderManager:
         to create a new folder (e.g., after moving or changing
         radiators). If not, continues using the existing folder.
         """
-        if pyip.inputYesNo(self._get_folder_prompt()) == SCons.AGREE.value:
+        if pyip.inputYesNo(self._get_folder_prompt()) == SCons.AGREE:
             self._create_custom_folder(self.folder_path)
         else:
             self._create_default_folder()
@@ -83,9 +83,9 @@ class ExcelFolderManager:
             The appropriate folder selection prompt for the user.
         """
         if not os.path.exists(self.folder_path):
-            return UserMsgs.FOLDER_GENERATION.value.format(folder_path=self.folder_path)
+            return UserMsgs.FOLDER_GENERATION.format(folder_path=self.folder_path)
 
-        return UserMsgs.FOLDER_RESET_PROMPT.value.format(folder_path=self.folder_path)
+        return UserMsgs.FOLDER_RESET_PROMPT.format(folder_path=self.folder_path)
 
     def _create_custom_folder(self, folder_path: str) -> None:
         """Handles the creation of a custom folder and files migration.
@@ -139,7 +139,7 @@ class FolderGenerator:
         """
         while True:
             if self._generate_custom_folder(folder_path):
-                self.config_update[SCons.UPDATE.value] = True
+                self.config_update[SCons.UPDATE] = True
                 break
 
     def _generate_custom_folder(self, folder_path: str) -> bool:
@@ -172,10 +172,8 @@ class FolderGenerator:
 
     def _prompt_folder_path(self) -> None:
         """Asks the user to enter a custom path for the Excel files folder."""
-        self.config_data[CKeys.EXCEL_FOLDER.value] = pyip.inputStr(
-            UserMsgs.EXCEL_FOLDER_PROMPT.value
-        )
-        logging.info("Folder decided by the user: %s", self.config_data[CKeys.EXCEL_FOLDER.value])
+        self.config_data[CKeys.EXCEL_FOLDER] = pyip.inputStr(UserMsgs.EXCEL_FOLDER_PROMPT)
+        logging.info("Folder decided by the user: %s", self.config_data[CKeys.EXCEL_FOLDER])
 
     def _validate_folder_path(self) -> bool:
         """Validates whether the provided folder path exists.
@@ -183,7 +181,7 @@ class FolderGenerator:
         Returns:
             True if the folder is confirmed; False otherwise.
         """
-        excel_folder = self.config_data[CKeys.EXCEL_FOLDER.value]
+        excel_folder = self.config_data[CKeys.EXCEL_FOLDER]
 
         if os.path.exists(os.path.dirname(excel_folder)):
             print(f"\nNew folder path: {excel_folder}")
@@ -198,7 +196,7 @@ class FolderGenerator:
             False since the path is not a valid one.
         """
         print("\n❌ WARNING: The Path provided does not exist. Please enter a correct one.")
-        logging.info("User chose a wrong path: %s.", self.config_data[CKeys.EXCEL_FOLDER.value])
+        logging.info("User chose a wrong path: %s.", self.config_data[CKeys.EXCEL_FOLDER])
         return False
 
     def _assert_correct_location(self) -> bool:
@@ -207,8 +205,8 @@ class FolderGenerator:
         Returns:
             True if the user confirms the location; False otherwise.
         """
-        confirm_location = f"Confirm: {self.config_data[CKeys.EXCEL_FOLDER.value]}? (yes/no)\n"
-        if pyip.inputYesNo(confirm_location) == SCons.AGREE.value:
+        confirm_location = f"Confirm: {self.config_data[CKeys.EXCEL_FOLDER]}? (yes/no)\n"
+        if pyip.inputYesNo(confirm_location) == SCons.AGREE:
             return True
 
         print("\nOkay, provide a new path.")
@@ -223,15 +221,15 @@ class FolderGenerator:
         Args:
             old_path: Path to the Excel folder used in previous runs.
         """
-        new_path = self.config_data[CKeys.EXCEL_FOLDER.value]
+        new_path = self.config_data[CKeys.EXCEL_FOLDER]
         if old_path == new_path:
             utils.display_user_info(
-                UserMsgs.SAME_FOLDER_NAME.value.format(
+                UserMsgs.SAME_FOLDER_NAME.format(
                     new_folder=os.path.basename(new_path), old_folder=os.path.basename(old_path)
                 )
             )
-            self.config_data[CKeys.EXCEL_FOLDER.value] = new_path + Folds.FOLDER_NAME_SUFFIX.value
-            logging.info("Appended suffix to: %s", self.config_data[CKeys.EXCEL_FOLDER.value])
+            self.config_data[CKeys.EXCEL_FOLDER] = new_path + Folds.FOLDER_NAME_SUFFIX
+            logging.info("Appended suffix to: %s", self.config_data[CKeys.EXCEL_FOLDER])
 
     def _handle_file_migration(self, old_path: str) -> None:
         """Handles file migration if the folder path has changed.
@@ -242,7 +240,7 @@ class FolderGenerator:
         Args:
             old_path: Path to the Excel folder used in previous runs.
         """
-        new_path = self.config_data[CKeys.EXCEL_FOLDER.value]
+        new_path = self.config_data[CKeys.EXCEL_FOLDER]
         self._recap_folder_content(old_path)
         self._copy_old_files(old_path, new_path)
 
@@ -252,9 +250,9 @@ class FolderGenerator:
         Args:
             old_path: The path of the old folder to display.
         """
-        utils.display_user_info(UserMsgs.OLD_FILES_INFO.value)
+        utils.display_user_info(UserMsgs.OLD_FILES_INFO)
 
-        for file in Path(old_path).rglob(Files.XLSX.value):
+        for file in Path(old_path).rglob(Files.XLSX):
             print(f"- {file}")
 
     def _copy_old_files(self, old_path: str, new_path: str) -> None:
@@ -264,9 +262,9 @@ class FolderGenerator:
             old_path: Source folder.
             new_path: Destination folder.
         """
-        copy_prompt = UserMsgs.COPY_OLD_FILES.value.format(old_path=old_path, new_path=new_path)
+        copy_prompt = UserMsgs.COPY_OLD_FILES.format(old_path=old_path, new_path=new_path)
 
-        if pyip.inputYesNo(copy_prompt) == SCons.AGREE.value:
+        if pyip.inputYesNo(copy_prompt) == SCons.AGREE:
             logging.info("User decided to move files from %s to %s", old_path, new_path)
             shutil.copytree(
                 old_path, os.path.join(new_path, os.path.basename(old_path)), dirs_exist_ok=True
@@ -279,11 +277,11 @@ class FolderGenerator:
         """Creates the default folder if it doesn't already exist."""
         logging.info("User decided to use default folder for Excel files.")
         self._make_folder()
-        self.config_update[SCons.UPDATE.value] = True
+        self.config_update[SCons.UPDATE] = True
 
     def _make_folder(self) -> None:
         """Creates a folder for the Excel files."""
-        folder = self.config_data[CKeys.EXCEL_FOLDER.value]
+        folder = self.config_data[CKeys.EXCEL_FOLDER]
         logging.info("Creating %s as folder", folder)
         os.makedirs(folder, exist_ok=True)
         print(f"\n✅ Folder ready: {folder}\nAll Excel files will be saved here.\n")

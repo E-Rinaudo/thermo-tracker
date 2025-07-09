@@ -1,7 +1,8 @@
 #!/bin/bash
 
-VENV_PATH="/Users/enricorinaudo/Desktop/Coding/python_work/my_projects/thermo_tracker/venv"
-SCRIPT_PATH="/Users/enricorinaudo/Desktop/Coding/python_work/my_projects/thermo_tracker/thermo_tracker.py"
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VENV_PATH="$PROJECT_DIR/venv"
+SCRIPT_PATH="$PROJECT_DIR/thermo_tracker.py"
 
 osascript -e 'tell application "Terminal"
     activate

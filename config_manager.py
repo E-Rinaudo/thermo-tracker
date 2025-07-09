@@ -17,11 +17,10 @@ from typing import Any
 import constants as cons
 
 # Aliases for all the Enums of constants.py.
-Folds = cons.Folders
-Files = cons.Files
 CKeys = cons.ConfigKeys
+Files = cons.Files
+Folds = cons.Folders
 SCons = cons.SharedConstants
-SNums = cons.SharedNumbers
 
 
 # endregion.
@@ -58,30 +57,30 @@ class ConfigManager:
         default values and initialize the configuration accordingly.
         """
         try:
-            with open(Files.CONFIG_FILE.value, "r", encoding="utf-8") as file:
+            with open(Files.CONFIG_FILE, "r", encoding="utf-8") as file:
                 logging.info("Retrieving info from the config file.")
                 config = json.load(file)
         except FileNotFoundError:
             logging.info("The config file has not been generated yet.")
             # Only the DEFAULT_EXCEL_FOLDER is set here, as other settings are
             # not needed at this stage and can be configured by the user later.
-            self.config_data[CKeys.EXCEL_FOLDER.value] = Folds.DEFAULT_EXCEL_FOLDER.value
+            self.config_data[CKeys.EXCEL_FOLDER] = Folds.DEFAULT_EXCEL_FOLDER
         else:
             self.config_data.update(config)
 
     def save_config(self) -> None:
         """Saves the settings to a JSON configuration file for future use."""
-        if self.config_update[SCons.UPDATE.value]:
-            os.makedirs(Folds.CONFIG_FOLDER.value, exist_ok=True)
+        if self.config_update[SCons.UPDATE]:
+            os.makedirs(Folds.CONFIG_FOLDER, exist_ok=True)
 
-            with open(Files.CONFIG_FILE.value, "w", encoding="utf-8") as config:
+            with open(Files.CONFIG_FILE, "w", encoding="utf-8") as config:
                 logging.info("Writing to the config file.")
-                json.dump(self.config_data, config, indent=SNums.FOUR.value)
+                json.dump(self.config_data, config, indent=4)
 
     def delete_config(self) -> None:
         """Deletes the JSON configuration file to ensure a clean setup."""
-        if os.path.exists(Files.CONFIG_FILE.value):
-            os.remove(Files.CONFIG_FILE.value)
+        if os.path.exists(Files.CONFIG_FILE):
+            os.remove(Files.CONFIG_FILE)
             logging.info("Config file deleted.")
 
 

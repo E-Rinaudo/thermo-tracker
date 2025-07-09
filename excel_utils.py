@@ -17,8 +17,8 @@ import constants as cons
 
 # Aliases for all the Enums of constants.py.
 RegMeta = cons.RegistryExcelMeta
+UFCols = cons.UsageFileCols
 UsgMeta = cons.UsageExcelMeta
-SNums = cons.SharedNumbers
 
 
 # endregion.
@@ -65,7 +65,7 @@ class ExcelSharedMethods:
             self.worksheet.column_dimensions[col].width = len(header) + meta.COL_EXTRA_SPACE.value
 
             # Only UsageExcelMeta has NOTES_COLUMN_SPACE and the notes column is always "I".
-            if hasattr(meta, "NOTES_COLUMN_SPACE") and col == meta.COLS.value[SNums.EIGHT.value]:
+            if hasattr(meta, "NOTES_COLUMN_SPACE") and col == meta.COLS.value[UFCols.VALVE_SETTING]:
                 self.worksheet.column_dimensions[col].width = meta.NOTES_COLUMN_SPACE.value
 
     def save_workbook(self, file_path: str, label: str) -> None:
