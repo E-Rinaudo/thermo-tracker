@@ -9,7 +9,7 @@ the project.
 """
 
 import os
-from enum import Enum, StrEnum, IntEnum
+from enum import Enum, IntEnum, StrEnum
 from textwrap import dedent
 
 # endregion.
