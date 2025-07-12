@@ -2,7 +2,8 @@
 
 
 # region Module Description And Imports.
-"""THERMO TRACKER - Radiator Heat Usage Tracking (CLI Application)
+"""THERMO TRACKER - Radiator Heat Usage Tracking (CLI Application).
+
 ================================================================================
 
 This program records heat usage data from radiators equipped with ISTA heat cost

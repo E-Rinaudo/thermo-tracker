@@ -394,6 +394,7 @@ class RegistryUpdater:
         """Prompts the user if they want to update a specific radiator header.
 
         Args:
+            row: The list of cell objects representing the radiator's data.
             header: The header name of the column being modified.
             cell: The cell object to be modified.
         """
