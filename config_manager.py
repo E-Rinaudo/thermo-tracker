@@ -12,6 +12,7 @@ settings.
 import json
 import logging
 import os
+import sys
 from typing import Any
 
 import constants as cons
@@ -73,9 +74,14 @@ class ConfigManager:
         if self.config_update[SCons.UPDATE]:
             os.makedirs(Folds.CONFIG_FOLDER, exist_ok=True)
 
+        try:
             with open(Files.CONFIG_FILE, "w", encoding="utf-8") as config:
                 logging.info("Writing to the config file.")
                 json.dump(self.config_data, config, indent=4)
+        except OSError as err:
+            logging.error("Failed to write config file: %s", err)
+            print("Error saving the configuratin file. Terminating program.")
+            sys.exit(1)
 
     def delete_config(self) -> None:
         """Deletes the JSON configuration file to ensure a clean setup."""
