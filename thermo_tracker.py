@@ -144,7 +144,8 @@ class ThermoTracker:
             logging.debug("Closing the program.")
         except OSError as err:
             logging.error("Failed to write config file: %s", err)
-            print("Error saving the configuration file. Terminating program. Restart session.")
+            print("Error saving the configuration file. Terminating program.")
+            print("Check the folder permissions or disk space, then restart the application.")
             sys.exit(1)
 
 
