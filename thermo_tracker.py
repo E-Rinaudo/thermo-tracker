@@ -33,6 +33,7 @@ Program Workflow:
 """
 
 import logging
+import sys
 from typing import Any, cast
 
 import constants as cons
@@ -138,8 +139,13 @@ class ThermoTracker:
 
     def save_app(self) -> None:
         """Saves the current configuration to the JSON file."""
-        self._get_config_manager().save_config()
-        logging.debug("Closing the program.")
+        try:
+            self._get_config_manager().save_config()
+            logging.debug("Closing the program.")
+        except OSError as err:
+            logging.error("Failed to write config file: %s", err)
+            print("Error saving the configuration file. Terminating program. Restart session.")
+            sys.exit(1)
 
 
 # endregion.
