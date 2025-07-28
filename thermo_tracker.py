@@ -157,8 +157,7 @@ if __name__ == "__main__":
         thermo_tracker = ThermoTracker()
         thermo_tracker.run_app()
     except KeyboardInterrupt:
-        msg = "Terminating program due to Keyboard Interrupt."
-        logging.info(msg)
-        print(msg)
+        logging.info("Terminating program due to Keyboard Interrupt.")
+        print("\nProgram interrupted by user. Stopping the program.")
     finally:
         thermo_tracker.save_app()
