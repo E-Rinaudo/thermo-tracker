@@ -202,7 +202,7 @@ Distributed under the MIT License. See [`LICENSE.txt`][license-url] for details.
 
 If you have any questions, feedback, or just want to get in touch, feel free to reach out to me via email. Your feedback is appreciated as it helps me to continue improving.
 
-- Email: <enricorinaudo91@gmail.com>  
+- Email: <erinaudo.gh@w.ernode.com>  
 
 You can also explore my GitHub profile.
 
@@ -220,7 +220,7 @@ You can also explore my GitHub profile.
 [license-shield]: https://img.shields.io/github/license/E-Rinaudo/thermo-tracker.svg?style=flat
 [license-url]: https://github.com/E-Rinaudo/thermo-tracker/blob/main/LICENSE.txt
 [Gmail-shield]: https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white
-[Gmail-url]: mailto:enricorinaudo91@gmail.com
+[Gmail-url]: erinaudo.gh@w.ernode.com
 
 <!-- BADGES -->
 [Python-badge]: https://img.shields.io/badge/python-3670A0?logo=python&logoColor=ffdd54&style=flat
